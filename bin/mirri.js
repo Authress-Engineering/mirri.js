@@ -32,6 +32,18 @@ commander
 		mirri.Cleanup(selectedProfile)
 		.then(() => console.log('Cleanup Complete.'));
 	});
+commander
+	.command('schedule [frequency] [profile]')
+	.description('Schedule a crontab task to rotate keys.')
+	.action((frequency, profile) => {
+		var selectedProfile = profile || 'default';
+		var specifiedFrequency = frequency || '@weekly';
+		aws.config.credentials = new aws.SharedIniFileCredentials({profile: selectedProfile});
+		var iam = new aws.IAM();
+		var mirri = new Mirri(iam);
+		mirri.Schedule(selectedProfile, specifiedFrequency)
+		.then(() => console.log('Mirri scheduled.'));
+	});
 
 commander.on('*', () => {
 	if(commander.args.join(' ') == 'tests/**/*.js') { return; }
@@ -40,4 +52,4 @@ commander.on('*', () => {
 	process.exit(0);
 });
 
-commander.parse(process.argv[2] ? process.argv : process.argv.concat(['rotate']));
+commander.parse(process.argv[2] ? process.argv : process.argv.concat(['help']));
