@@ -4,6 +4,7 @@ const aws = require('aws-sdk');
 const fs = require('fs-extra');
 const platform = require('platform');
 const path = require('path');
+const crontab = require('crontab');
 
 function Mirri(iamClient) {
 	this.iamClient = iamClient;
@@ -18,7 +19,7 @@ Mirri.prototype.Rotate = function(profile, force) {
 		let accessKeyId = results.AccessKey.AccessKeyId;
 		let secretAccessKey = results.AccessKey.SecretAccessKey;
 		// update the credentials file ~/.aws/credentials or %USERPROFILE%.awscredentials
-		var credentialsFile = platform.os.family.match(/windows/i) ? `${process.env.USERPROFILE}.awscredentials` : `${process.env.HOME}/.aws/credentials`;
+		let credentialsFile = platform.os.family.match(/windows/i) ? `${process.env.USERPROFILE}.awscredentials` : `${process.env.HOME}/.aws/credentials`;
 		return new Promise((s, f) => { fs.readFile(credentialsFile, 'UTF-8', (error, data) => { error ? f(error) : s(data)}); })
 		.then(fileInfo => fileInfo.replace(aws.config.credentials.accessKeyId, accessKeyId).replace(aws.config.credentials.secretAccessKey, secretAccessKey))
 		.then(fileInfo => {
@@ -48,6 +49,16 @@ Mirri.prototype.Cleanup = function(profile) {
 		}
 		let accessKeyId = data.AccessKeyMetadata.filter(key => key.AccessKeyId !== aws.config.credentials.accessKeyId)[0].AccessKeyId;
 		return this.iamClient.deleteAccessKey({AccessKeyId: accessKeyId}).promise();
+	});
+};
+
+Mirri.prototype.Schedule = function(profile, frequency) {
+	let command = `mirri rotate --force ${profile}`;
+	return new Promise((s, f) => crontab.load((error, cronProvider) => error ? f(error) : s(cronProvider)))
+	.then(cronProvider => {
+		cronProvider.remove({command: command});
+		cronProvider.create(command, frequency);
+		return new Promise((s, f) => cronProvider.save((error, result) => error ? f(error) : s(result)));
 	});
 };
 module.exports = Mirri;
