@@ -9,18 +9,32 @@ var version = require(path.join(__dirname, '../package.json')).version;
 commander.version(version);
 
 commander
-	.command('rotate')
-	.description('Rotate current AWS key.')
-	.action(() => {
-		console.log('Rotating AWS key');
-		console.log('');
+	.command('rotate [profile]')
+	.usage('rotate [options] [profile]')
+	.option('-f, --force', 'Allow rotate to delete unused keys.', false)
+	.description('Rotate AWS key, defaults to default')
+	.action((profile, options) => {
+		var selectedProfile = profile || 'default';
+		aws.config.credentials = new aws.SharedIniFileCredentials({profile: selectedProfile});
 		var iam = new aws.IAM();
 		var mirri = new Mirri(iam);
+		mirri.Rotate(selectedProfile, options.force)
+		.then(() => console.log('AWS key rotation Complete.'));
+	});
+commander
+	.command('cleanup [profile]')
+	.description('Removes unused key from IAM user.')
+	.action((profile) => {
+		var selectedProfile = profile || 'default';
+		aws.config.credentials = new aws.SharedIniFileCredentials({profile: selectedProfile});
+		var iam = new aws.IAM();
+		var mirri = new Mirri(iam);
+		mirri.Cleanup(selectedProfile)
+		.then(() => console.log('Cleanup Complete.'));
 	});
 
 commander.on('*', () => {
 	if(commander.args.join(' ') == 'tests/**/*.js') { return; }
-	displayHeader();
 	console.log('Unknown Command: ' + commander.args.join(' '));
 	commander.help();
 	process.exit(0);
