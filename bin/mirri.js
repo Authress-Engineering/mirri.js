@@ -3,6 +3,7 @@
 var commander = require('commander');
 var path = require('path');
 var Mirri = require('../index');
+var aws = require('aws-sdk');
 
 var version = require(path.join(__dirname, '../package.json')).version;
 commander.version(version);
@@ -13,7 +14,8 @@ commander
 	.action(() => {
 		console.log('Rotating AWS key');
 		console.log('');
-		var mirri = new Mirri();
+		var iam = new aws.IAM();
+		var mirri = new Mirri(iam);
 	});
 
 commander.on('*', () => {
