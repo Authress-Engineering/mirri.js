@@ -14,16 +14,16 @@
     "mirri": "./bin/mirri.js"
   },
   "dependencies": {
-    "aws-sdk": "^2.3.14",
-    "commander": "^2.5.0"
+    "aws-sdk": "2.9.0",
+    "commander": "2.9.0"
   },
   "devDependencies": {
+    "chai": "3.5.0",
     "ci-build-tools": "1.0.9",
-    "chai": "^3.5.0",
-    "esprima": "^2.7.2",
-    "glob": "^5.0.15",
-    "mocha": "^2.4.5",
-    "sinon": "^1.17.3"
+    "esprima": "2.7.2",
+    "glob": "7.1.1",
+    "mocha": "^3.2.0",
+    "sinon": "1.17.7"
   },
   "repository": {
     "type": "git",
@@ -31,18 +31,12 @@
   },
   "keywords": [
     "aws",
-    "cloudfront",
-    "package creation",
-    "microservice",
-    "api gateway",
-    "serverless",
-    "api gateway",
-    "aws api gateway",
-    "lambda",
-    "aws lambda",
+    "IAM",
+    "key rotation",
+    "secret key management",
+    "mirri",
     "amazon",
-    "amazon web services",
-    "dynamodb"
+    "amazon web services"
   ],
   "author": "Warren Parad <wparad@gmail.com> (http://wparad.github.io)",
   "license": "BSD-3-Clause",
