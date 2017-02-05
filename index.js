@@ -16,14 +16,19 @@ Mirri.prototype.Rotate = function(profile, force) {
 	}
 	return p.then(() => this.iamClient.createAccessKey().promise())
 	.then(results => {
+		var currentAccessKey = aws.config.credentials.accessKeyId;
+		var currentSecretKey = aws.config.credentials.secretAccessKey;
 		let accessKeyId = results.AccessKey.AccessKeyId;
 		let secretAccessKey = results.AccessKey.SecretAccessKey;
 		// update the credentials file ~/.aws/credentials or %USERPROFILE%.awscredentials
 		let credentialsFile = platform.os.family.match(/windows/i) ? `${process.env.USERPROFILE}.awscredentials` : `${process.env.HOME}/.aws/credentials`;
 		return new Promise((s, f) => { fs.readFile(credentialsFile, 'UTF-8', (error, data) => { error ? f(error) : s(data)}); })
-		.then(fileInfo => fileInfo.replace(aws.config.credentials.accessKeyId, accessKeyId).replace(aws.config.credentials.secretAccessKey, secretAccessKey))
+		.then(fileInfo => fileInfo.replace(currentAccessKey, accessKeyId).replace(currentSecretKey, secretAccessKey))
 		.then(fileInfo => {
 			return new Promise((s, f) => { fs.outputFile(credentialsFile, fileInfo, (error) => error ? f(error) : s(null)); });
+		})
+		.then(() => {
+			return this.iamClient.updateAccessKey({AccessKeyId: currentAccessKey, Status: 'Inactive'}).promise();
 		});
 	})
 	.catch(failure => {
@@ -57,7 +62,7 @@ Mirri.prototype.Schedule = function(profile, frequency) {
 	return new Promise((s, f) => crontab.load((error, cronProvider) => error ? f(error) : s(cronProvider)))
 	.then(cronProvider => {
 		cronProvider.remove({command: command});
-		cronProvider.create(command, frequency);
+		cronProvider.create(command, frequency, 'Managed by Mirri.js');
 		return new Promise((s, f) => cronProvider.save((error, result) => error ? f(error) : s(result)));
 	});
 };
