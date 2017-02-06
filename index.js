@@ -5,6 +5,7 @@ const fs = require('fs-extra');
 const platform = require('platform');
 const path = require('path');
 const crontab = require('crontab');
+const _ = require('lodash');
 
 function Mirri(iamClient) {
 	this.iamClient = iamClient;
@@ -22,8 +23,10 @@ Mirri.prototype.Rotate = function(profile, force) {
 		let secretAccessKey = results.AccessKey.SecretAccessKey;
 		// update the credentials file ~/.aws/credentials or %USERPROFILE%.awscredentials
 		let credentialsFile = platform.os.family.match(/windows/i) ? `${process.env.USERPROFILE}.awscredentials` : `${process.env.HOME}/.aws/credentials`;
+		var accessKeyRE = new RegExp(_.escapeRegExp(currentAccessKey), 'g');
+		var secretKeyRE = new RegExp(_.escapeRegExp(currentSecretKey), 'g');
 		return new Promise((s, f) => { fs.readFile(credentialsFile, 'UTF-8', (error, data) => { error ? f(error) : s(data)}); })
-		.then(fileInfo => fileInfo.replace(currentAccessKey, accessKeyId).replace(currentSecretKey, secretAccessKey))
+		.then(fileInfo => fileInfo.replace(accessKeyRE, accessKeyId).replace(secretKeyRE, secretAccessKey))
 		.then(fileInfo => {
 			return new Promise((s, f) => { fs.outputFile(credentialsFile, fileInfo, (error) => error ? f(error) : s(null)); });
 		})
