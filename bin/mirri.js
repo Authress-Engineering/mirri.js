@@ -33,9 +33,9 @@ commander
 		.then(() => console.log('Cleanup Complete.'));
 	});
 commander
-	.command('schedule [frequency] [profile]')
+	.command('schedule [profile] [frequency]')
 	.description('Schedule a crontab task to rotate keys.')
-	.action((frequency, profile) => {
+	.action((profile, frequency) => {
 		var selectedProfile = profile || 'default';
 		var specifiedFrequency = frequency || '@weekly';
 		aws.config.credentials = new aws.SharedIniFileCredentials({profile: selectedProfile});
