@@ -16,10 +16,10 @@ Rotate the access key associated with the profile. Forcing a rotation, will auto
 ```
 
 ### Schedule auto rotate
-Rotate the access key associated with the profile on a schedule. The default is weekly rotate.  Frequency is a crontab frequency.
+Rotate the access key associated with the profile on a schedule. The default is weekly rotate. Frequency is a crontab frequency.
 
 ```bash
-    mirri schedule [frequency] [profile name]
+    mirri schedule [profile name] [frequency]
 ```
 
 ### Cleanup
