@@ -22,7 +22,7 @@ Mirri.prototype.Rotate = function(profile, force) {
 		let accessKeyId = results.AccessKey.AccessKeyId;
 		let secretAccessKey = results.AccessKey.SecretAccessKey;
 		// update the credentials file ~/.aws/credentials or %USERPROFILE%.awscredentials
-		let credentialsFile = platform.os.family.match(/windows/i) ? `${process.env.USERPROFILE}.awscredentials` : `${process.env.HOME}/.aws/credentials`;
+		let credentialsFile = platform.os.family && platform.os.family.match(/windows/i) ? `${process.env.USERPROFILE}.awscredentials` : `${process.env.HOME}/.aws/credentials`;
 		var accessKeyRE = new RegExp(_.escapeRegExp(currentAccessKey), 'g');
 		var secretKeyRE = new RegExp(_.escapeRegExp(currentSecretKey), 'g');
 		return new Promise((s, f) => { fs.readFile(credentialsFile, 'UTF-8', (error, data) => { error ? f(error) : s(data)}); })
