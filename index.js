@@ -2,7 +2,6 @@
 
 const aws = require('aws-sdk');
 const fs = require('fs-extra');
-const platform = require('platform');
 const path = require('path');
 const crontab = require('crontab');
 const _ = require('lodash');
@@ -21,8 +20,8 @@ Mirri.prototype.Rotate = function(profile, force) {
 		var currentSecretKey = aws.config.credentials.secretAccessKey;
 		let accessKeyId = results.AccessKey.AccessKeyId;
 		let secretAccessKey = results.AccessKey.SecretAccessKey;
-		// update the credentials file ~/.aws/credentials or %USERPROFILE%.awscredentials
-		let credentialsFile = platform.os.family && platform.os.family.match(/windows/i) ? `${process.env.USERPROFILE}.awscredentials` : `${process.env.HOME}/.aws/credentials`;
+		// update the credentials file ~/.aws/credentials (linux) or %USERPROFILE%/.aws/credentials (windows)
+		let credentialsFile = `${process.env.HOME || process.env.USERPROFILE}/.aws/credentials`;
 		var accessKeyRE = new RegExp(_.escapeRegExp(currentAccessKey), 'g');
 		var secretKeyRE = new RegExp(_.escapeRegExp(currentSecretKey), 'g');
 		return new Promise((s, f) => { fs.readFile(credentialsFile, 'UTF-8', (error, data) => { error ? f(error) : s(data)}); })
