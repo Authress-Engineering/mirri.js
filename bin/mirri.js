@@ -23,6 +23,7 @@ commander
 	});
 commander
 	.command('cleanup [profile]')
+	.usage('cleanup [profile]')
 	.description('Removes unused key from IAM user.')
 	.action((profile) => {
 		var selectedProfile = profile || 'default';
@@ -34,14 +35,16 @@ commander
 	});
 commander
 	.command('schedule [profile] [frequency]')
+	.usage('schedule [options] [profile] [frequency]')
+	.option('-p, --path', 'Register with the full path of mirri.', false)
 	.description('Schedule a crontab task to rotate keys.')
-	.action((profile, frequency) => {
+	.action((profile, frequency, options) => {
 		var selectedProfile = profile || 'default';
 		var specifiedFrequency = frequency || '@weekly';
 		aws.config.credentials = new aws.SharedIniFileCredentials({profile: selectedProfile});
 		var iam = new aws.IAM();
 		var mirri = new Mirri(iam);
-		mirri.Schedule(selectedProfile, specifiedFrequency)
+		mirri.Schedule(selectedProfile, specifiedFrequency, options.path)
 		.then(() => console.log('Mirri scheduled.'));
 	});
 

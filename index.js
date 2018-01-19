@@ -5,6 +5,7 @@ const fs = require('fs-extra');
 const path = require('path');
 const crontab = require('crontab');
 const _ = require('lodash');
+const which = require('which');
 
 function Mirri(iamClient) {
 	this.iamClient = iamClient;
@@ -20,6 +21,7 @@ Mirri.prototype.Rotate = function(profile, force) {
 		var currentSecretKey = aws.config.credentials.secretAccessKey;
 		let accessKeyId = results.AccessKey.AccessKeyId;
 		let secretAccessKey = results.AccessKey.SecretAccessKey;
+
 		// update the credentials file ~/.aws/credentials (linux) or %USERPROFILE%/.aws/credentials (windows)
 		let credentialsFile = `${process.env.HOME || process.env.USERPROFILE}/.aws/credentials`;
 		var accessKeyRE = new RegExp(_.escapeRegExp(currentAccessKey), 'g');
@@ -59,10 +61,14 @@ Mirri.prototype.Cleanup = function(profile) {
 	});
 };
 
-Mirri.prototype.Schedule = function(profile, frequency) {
-	let command = `mirri rotate --force ${profile}`;
-	return new Promise((s, f) => crontab.load((error, cronProvider) => error ? f(error) : s(cronProvider)))
-	.then(cronProvider => {
+Mirri.prototype.Schedule = function(profile, frequency, useFullPath) {
+	let mirrorResolvedPathPromise = new Promise((s, f) => which('mirri', (error, resolvedPath) => error ? f(error) : s(resolvedPath)));
+	let cronProviderPomise = new Promise((s, f) => crontab.load((error, cronProvider) => error ? f(error) : s(cronProvider)));
+	return Promise.all([mirrorResolvedPathPromise, cronProviderPomise])
+	.then(results => {
+		let mirriPath = useFullPath ? results[0] : 'mirri';
+		let cronProvider = results[1];
+		let command = `${mirriPath} rotate --force ${profile}`;
 		cronProvider.remove({command: command});
 		cronProvider.create(command, frequency, 'Managed by Mirri.js');
 		return new Promise((s, f) => cronProvider.save((error, result) => error ? f(error) : s(result)));

@@ -11,17 +11,21 @@ Javascript based toolkit for automatically rotating aws IAM access keys. Mirri a
 ## Usage
 
 ### Rotate
-Rotate the access key associated with the profile. Forcing a rotation, will automatically detect and delete extra unused keys.
+Rotate the access key associated with the profile. Forcing a rotation, will automatically detect and delete extra unused keys.  If force is not specified rotate will fail if there are two keys in use.
 
 ```bash
     mirri rotate [--force] [profile name]
 ```
 
 ### Schedule auto rotate
-Rotate the access key associated with the profile on a schedule. The default is weekly rotate. Frequency is a crontab frequency.
+Rotate the access key associated with the profile on a schedule. The default is weekly rotate. Frequency is a crontab frequency.  You must have mirri on your path for default scheduling to work.  If using
+cron this means having something like this `PATH=/home/wparad/.nvm/versions/node/v8.4.0/bin:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin` specified.  Cron uses a reduced path.  If you don't
+wish to specify a path in your crontab instead pass `-p` as an option.
+Options:
+* `-p --path`: register mirri with the full path to the executable.  This is important if your scheduling system does not contain your node modules in the path.
 
 ```bash
-    mirri schedule [profile name] [frequency]
+    mirri schedule [options] [profile name] [frequency]
 ```
 
 ### Cleanup
