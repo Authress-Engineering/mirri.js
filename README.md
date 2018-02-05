@@ -34,3 +34,6 @@ AWS only allows two access key per IAM user. If there are already two, only one 
 ```bash
     mirri cleanup [profile name]
 ```
+
+## Caveats
+Since most OS sandbox script execution environment variables cannot be changed with mirri. (For further information see [#1](https://github.com/wparad/mirri.js/issues/1))
