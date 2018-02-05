@@ -64,9 +64,10 @@ Mirri.prototype.Cleanup = function(profile) {
 Mirri.prototype.Schedule = function(profile, frequency, useFullPath) {
 	let mirrorResolvedPathPromise = new Promise((s, f) => which('mirri', (error, resolvedPath) => error ? f(error) : s(resolvedPath)));
 	let cronProviderPomise = new Promise((s, f) => crontab.load((error, cronProvider) => error ? f(error) : s(cronProvider)));
-	return Promise.all([mirrorResolvedPathPromise, cronProviderPomise])
+	let nodeResolvedPathPromise = new Promise((s, f) => which('node', (error, resolvedPath) => error ? f(error) : s(resolvedPath)));
+	return Promise.all([mirrorResolvedPathPromise, cronProviderPomise, nodeResolvedPathPromise])
 	.then(results => {
-		let mirriPath = useFullPath ? results[0] : 'mirri';
+		let mirriPath = useFullPath ? `${results[2]} ${results[0]}` : 'mirri';
 		let cronProvider = results[1];
 		let command = `${mirriPath} rotate --force ${profile}`;
 		cronProvider.remove({command: command});
