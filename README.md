@@ -1,9 +1,9 @@
 # Mirri.js
-Javascript based toolkit for automatically rotating aws IAM access keys. Mirri attepmts to swap out AWS IAM Keys. It does this by:
+Javascript based toolkit for automatically rotating aws IAM access keys in the [AWS Credentials File](https://docs.aws.amazon.com/cli/latest/userguide/cli-multiple-profiles.html). Mirri attepmts to swap out AWS IAM Keys. It does this by:
 * Determining the current user and profile being used.
 * Creating a new IAM access key for this user.
 * Downloading the access key.
-* Updating the default credentials file by overwritting the existing access key.
+* Updating the profile's credentials by overwritting the existing access key in the credentials file.
 * Marking the original access key as invalid in aws IAM.
 
 [![npm version](https://badge.fury.io/js/mirri.svg)](https://badge.fury.io/js/mirri) [![Build Status](https://travis-ci.org/wparad/mirri.js.svg?branch=master)](https://travis-ci.org/wparad/mirri.js)
