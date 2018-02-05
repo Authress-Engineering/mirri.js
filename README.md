@@ -18,7 +18,7 @@ Rotate the access key associated with the profile. Forcing a rotation, will auto
 ```
 
 ### Schedule auto rotate
-Rotate the access key associated with the profile on a schedule. The default is weekly rotate. Frequency is a crontab frequency.  You must have mirri on your path for default scheduling to work.  If using
+Rotate the access key associated with the profile on a schedule. The default is weekly rotate. Frequency is a crontab frequency.  You must have `mirri` and `node` on your path for default scheduling to work.  If using
 cron this means having something like this `PATH=/home/wparad/.nvm/versions/node/v8.4.0/bin:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin` specified.  Cron uses a reduced path.  If you don't
 wish to specify a path in your crontab instead pass `-p` as an option.
 Options:
