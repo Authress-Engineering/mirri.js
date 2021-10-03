@@ -8,15 +8,12 @@ const _ = require('lodash');
 const which = require('which');
 
 function Mirri(iamClient) {
-	this.iamClient = iamClient;
+	this.iamClient = new aws.IAM();;
 }
-Mirri.prototype.Rotate = function(profile, force) {
-	let p = Promise.resolve();
-	if (force) {
-		p = p.then(() => this.Cleanup(profile));
-	}
-	return p.then(() => this.iamClient.createAccessKey().promise())
-	.then(results => {
+Mirri.prototype.Rotate = async function(profile, force) {
+	try {
+		await this.Cleanup(profile);
+		const results = await this.iamClient.createAccessKey().promise();
 		var currentAccessKey = aws.config.credentials.accessKeyId;
 		var currentSecretKey = aws.config.credentials.secretAccessKey;
 		let accessKeyId = results.AccessKey.AccessKeyId;
@@ -26,7 +23,8 @@ Mirri.prototype.Rotate = function(profile, force) {
 		let credentialsFile = `${process.env.HOME || process.env.USERPROFILE}/.aws/credentials`;
 		var accessKeyRE = new RegExp(_.escapeRegExp(currentAccessKey), 'g');
 		var secretKeyRE = new RegExp(_.escapeRegExp(currentSecretKey), 'g');
-		return new Promise((s, f) => { fs.readFile(credentialsFile, 'UTF-8', (error, data) => { error ? f(error) : s(data)}); })
+		
+		await new Promise((s, f) => { fs.readFile(credentialsFile, 'UTF-8', (error, data) => { error ? f(error) : s(data)}); })
 		.then(fileInfo => fileInfo.replace(accessKeyRE, accessKeyId).replace(secretKeyRE, secretAccessKey))
 		.then(fileInfo => {
 			return new Promise((s, f) => { fs.outputFile(credentialsFile, fileInfo, (error) => error ? f(error) : s(null)); });
@@ -34,19 +32,18 @@ Mirri.prototype.Rotate = function(profile, force) {
 		.then(() => {
 			return this.iamClient.updateAccessKey({AccessKeyId: currentAccessKey, Status: 'Inactive'}).promise();
 		});
-	})
-	.catch(failure => {
+	} catch (failure) {
 		if(failure.code && failure.code.match('InvalidClientTokenId')) {
-			console.log('The access key saved in your credentials file is not valid. If you just rotated your access key, please wait 10 seconds before rerunning this command again.');
-			return Promise.reject('InvalidAccessKey');
+			console.error('The access key saved in your credentials file is not valid. If you just rotated your access key, please wait 10 seconds before rerunning this command again.');
+			process.exit(1);
 		}
 		if(failure.code && failure.code.match('LimitExceeded')) {
-			console.log('You already have the maximum number of keys for this user. Rotating requires a free slot, either run cleanup, or pass the force flag');
-			return Promise.reject('LimitExceeded');
+			console.error('You already have the maximum number of keys for this user. Rotating requires a free slot, either run cleanup, or pass the force flag');
+			process.exit(1);
 		}
-		console.log(failure);
-		return Promise.reject(failure);
-	});
+		console.error(failure);
+		process.exit(1);
+	}
 };
 
 Mirri.prototype.Cleanup = function(profile) {

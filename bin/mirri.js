@@ -11,41 +11,37 @@ commander.version(version);
 commander
 	.command('rotate [profile]')
 	.usage('rotate [options] [profile]')
-	.option('-f, --force', 'Allow rotate to delete unused keys.', false)
 	.description('Rotate AWS key, defaults to default')
-	.action((profile, options) => {
+	.action(async (profile, options) => {
 		var selectedProfile = profile || 'default';
 		aws.config.credentials = new aws.SharedIniFileCredentials({profile: selectedProfile});
-		var iam = new aws.IAM();
-		var mirri = new Mirri(iam);
-		mirri.Rotate(selectedProfile, options.force)
-		.then(() => console.log('AWS key rotation Complete.'));
+		var mirri = new Mirri();
+		await mirri.Rotate(selectedProfile, options.force)
+		console.log('AWS key rotation Complete.');
 	});
 commander
 	.command('cleanup [profile]')
 	.usage('cleanup [profile]')
 	.description('Removes unused key from IAM user.')
-	.action((profile) => {
+	.action(async (profile) => {
 		var selectedProfile = profile || 'default';
 		aws.config.credentials = new aws.SharedIniFileCredentials({profile: selectedProfile});
-		var iam = new aws.IAM();
-		var mirri = new Mirri(iam);
-		mirri.Cleanup(selectedProfile)
-		.then(() => console.log('Cleanup Complete.'));
+		var mirri = new Mirri();
+		await mirri.Cleanup(selectedProfile)
+		console.log('Cleanup Complete.');
 	});
 commander
 	.command('schedule [profile] [frequency]')
 	.usage('schedule [options] [profile] [frequency]')
 	.option('-p, --path', 'Register with the full path of mirri.', false)
 	.description('Schedule a crontab task to rotate keys.')
-	.action((profile, frequency, options) => {
+	.action(async (profile, frequency, options) => {
 		var selectedProfile = profile || 'default';
 		var specifiedFrequency = frequency || '@weekly';
 		aws.config.credentials = new aws.SharedIniFileCredentials({profile: selectedProfile});
-		var iam = new aws.IAM();
-		var mirri = new Mirri(iam);
-		mirri.Schedule(selectedProfile, specifiedFrequency, options.path)
-		.then(() => console.log('Mirri scheduled.'));
+		var mirri = new Mirri();
+		await mirri.Schedule(selectedProfile, specifiedFrequency, options.path);
+		console.log('Mirri scheduled.');
 	});
 
 commander.on('*', () => {
