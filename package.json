@@ -8,7 +8,8 @@
     "bin"
   ],
   "scripts": {
-    "test": "mocha tests/**/*.js -R spec"
+    "test": "mocha tests/**/*.js -R spec",
+    "lint": "eslint --ext .js index.js make.js"
   },
   "bin": {
     "mirri": "./bin/mirri.js"
@@ -27,6 +28,11 @@
     "esprima": "2.7.2",
     "glob": "7.1.1",
     "mocha": "^9.1.0",
+    "eslint": "^7.20.0",
+    "eslint-config-cimpress-atsquad": "^1.0.67",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-mocha": "^8.0.0",
+    "eslint-plugin-node": "^11.1.0",
     "sinon": "1.17.7"
   },
   "repository": {
